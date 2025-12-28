@@ -47,7 +47,18 @@ func (t *Table) Insert(record Row) error {
 		if !ok {
 			return errors.New("missing field: " + field.Name)
 		}
-		_ = val
+
+		if field.Unique {
+			if _, exists := t.UniqueIndices[field.Name][val]; exists {
+				return errors.New("unique constraint violation: " + field.Name)
+			}
+		}
+	}
+
+	for _, field := range t.Schema.Fields {
+		if field.Unique {
+			t.UniqueIndices[field.Name][record[field.Name]] = struct{}{}
+		}
 	}
 
 	t.HotHeap.Rows = append(t.HotHeap.Rows, record)

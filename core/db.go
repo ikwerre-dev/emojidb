@@ -26,15 +26,17 @@ type Database struct {
 	Schemas    map[string]*Schema
 	Tables     map[string]*Table
 	Orphans    map[string][]*SealedClump
+	SyncSafety bool
 }
 
 type Table struct {
-	Mu           sync.RWMutex
-	Db           *Database
-	Name         string
-	Schema       *Schema
-	HotHeap      *HotHeap
-	SealedClumps []*SealedClump
+	Mu            sync.RWMutex
+	Db            *Database
+	Name          string
+	Schema        *Schema
+	HotHeap       *HotHeap
+	SealedClumps  []*SealedClump
+	UniqueIndices map[string]map[interface{}]struct{}
 }
 
 func Open(path, key string) (*Database, error) {
@@ -63,6 +65,7 @@ func Open(path, key string) (*Database, error) {
 		Schemas:    make(map[string]*Schema),
 		Tables:     make(map[string]*Table),
 		Orphans:    make(map[string][]*SealedClump),
+		SyncSafety: true,
 	}
 
 	if err := db.Load(); err != nil {

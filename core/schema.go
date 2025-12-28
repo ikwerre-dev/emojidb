@@ -14,8 +14,9 @@ const (
 )
 
 type Field struct {
-	Name string
-	Type FieldType
+	Name   string
+	Type   FieldType
+	Unique bool
 }
 
 type Schema struct {
@@ -38,14 +39,23 @@ func (db *Database) DefineSchema(tableName string, fields []Field) error {
 
 	db.Schemas[tableName] = schema
 
+	indices := make(map[string]map[interface{}]struct{})
+	for _, f := range fields {
+		if f.Unique {
+			indices[f.Name] = make(map[interface{}]struct{})
+		}
+	}
+
 	if table, ok := db.Tables[tableName]; ok {
 		table.Schema = schema
+		table.UniqueIndices = indices
 	} else {
 		db.Tables[tableName] = &Table{
-			Db:      db,
-			Name:    tableName,
-			Schema:  schema,
-			HotHeap: NewHotHeap(1000),
+			Db:            db,
+			Name:          tableName,
+			Schema:        schema,
+			HotHeap:       NewHotHeap(1000),
+			UniqueIndices: indices,
 		}
 		if orphans, ok := db.Orphans[tableName]; ok {
 			db.Tables[tableName].SealedClumps = orphans

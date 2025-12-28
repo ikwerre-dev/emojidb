@@ -62,6 +62,15 @@ func BatchBackupForSafety(db *core.Database, tableName string, rows []core.Row) 
 		return err
 	}
 
+	if db.SyncSafety {
+		return db.SafetyFile.Sync()
+	}
+	return nil
+}
+
+func CommitSafety(db *core.Database) error {
+	db.Mu.Lock()
+	defer db.Mu.Unlock()
 	return db.SafetyFile.Sync()
 }
 
