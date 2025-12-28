@@ -26,17 +26,23 @@ func Update(db *core.Database, tableName string, filter FilterFunc, update core.
 	defer table.Mu.Unlock()
 
 	var toBackup []core.Row
+	var indices []int
 	for i, row := range table.HotHeap.Rows {
 		if filter(row) {
 			toBackup = append(toBackup, row)
-			for k, v := range update {
-				table.HotHeap.Rows[i][k] = v
-			}
+			indices = append(indices, i)
 		}
 	}
 
 	if len(toBackup) > 0 {
-		return BatchBackupForSafety(db, tableName, toBackup)
+		if err := BatchBackupForSafety(db, tableName, toBackup); err != nil {
+			return err
+		}
+		for _, idx := range indices {
+			for k, v := range update {
+				table.HotHeap.Rows[idx][k] = v
+			}
+		}
 	}
 
 	return nil
@@ -54,8 +60,8 @@ func Delete(db *core.Database, tableName string, filter FilterFunc) error {
 	table.Mu.Lock()
 	defer table.Mu.Unlock()
 
-	var newRows []core.Row
 	var toBackup []core.Row
+	var newRows []core.Row
 	for _, row := range table.HotHeap.Rows {
 		if filter(row) {
 			toBackup = append(toBackup, row)
@@ -63,12 +69,14 @@ func Delete(db *core.Database, tableName string, filter FilterFunc) error {
 			newRows = append(newRows, row)
 		}
 	}
-	table.HotHeap.Rows = newRows
 
 	if len(toBackup) > 0 {
-		return BatchBackupForSafety(db, tableName, toBackup)
+		if err := BatchBackupForSafety(db, tableName, toBackup); err != nil {
+			return err
+		}
 	}
 
+	table.HotHeap.Rows = newRows
 	return nil
 }
 

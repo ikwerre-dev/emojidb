@@ -11,7 +11,7 @@ import (
 
 func TestSafetyEngine(t *testing.T) {
 	dbPath := "test_safety.db"
-	safetyPath := "safety.db"
+	safetyPath := dbPath + ".safety"
 	defer os.Remove(dbPath)
 	defer os.Remove(safetyPath)
 

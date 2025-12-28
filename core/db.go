@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-	"path/filepath"
 	"sync"
 
 	"github.com/ikwerre-dev/emojidb/crypto"
@@ -48,8 +47,7 @@ func Open(path, key string) (*Database, error) {
 		return nil, err
 	}
 
-	dbDir := filepath.Dir(path)
-	safetyPath := filepath.Join(dbDir, "safety.db")
+	safetyPath := path + ".safety"
 	sFile, err := os.OpenFile(safetyPath, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		file.Close()

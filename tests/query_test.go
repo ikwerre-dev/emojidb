@@ -11,7 +11,7 @@ import (
 
 func TestQuery(t *testing.T) {
 	dbPath := "test_query.db"
-	safetyPath := "safety.db"
+	safetyPath := dbPath + ".safety"
 
 	// We don't defer remove here so the user can see the files
 	os.Remove(dbPath)
@@ -35,8 +35,12 @@ func TestQuery(t *testing.T) {
 	db.Insert("users", core.Row{"id": 2, "name": "bob", "age": 25})
 
 	// Safety backup for inserts (calling it manually for now as requested)
-	safety.BackupForSafety(db, "users", core.Row{"id": 1, "name": "alice", "age": 30})
-	safety.BackupForSafety(db, "users", core.Row{"id": 2, "name": "bob", "age": 25})
+	if err := safety.BackupForSafety(db, "users", core.Row{"id": 1, "name": "alice", "age": 30}); err != nil {
+		t.Fatalf("backup failed: %v", err)
+	}
+	if err := safety.BackupForSafety(db, "users", core.Row{"id": 2, "name": "bob", "age": 25}); err != nil {
+		t.Fatalf("backup failed: %v", err)
+	}
 
 	// Force flush to disk
 	db.Flush("users")

@@ -16,7 +16,7 @@ func TestFullShowcase(t *testing.T) {
 	wd, _ := os.Getwd()
 	dbPath := filepath.Join(wd, "showcase.db")
 	dumpPath := filepath.Join(wd, "dump.json")
-	safetyPath := filepath.Join(wd, "safety.db")
+	safetyPath := dbPath + ".safety"
 
 	key := "showcase-secret-2025"
 

@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -125,53 +126,17 @@ func getSortedAlphabet() []eData {
 
 // DecodeOne reads one emoji from the reader and returns the original byte
 func DecodeOne(r *bufio.Reader) (byte, error) {
-	sorted := getSortedAlphabet()
-	var buf []byte
-	var lastMatch *eData
-	var lastMatchLen int
+	peeked, err := r.Peek(32)
+	if len(peeked) == 0 {
+		return 0, err
+	}
 
-	for {
-		b, err := r.ReadByte()
-		if err != nil {
-			if err == io.EOF && lastMatch != nil {
-				return lastMatch.base, nil
-			}
-			return 0, err
-		}
-		buf = append(buf, b)
-		s := string(buf)
-
-		foundPrefix := false
-		var matchFound bool
-		var matchVal byte
-		for _, ed := range sorted {
-			if s == ed.s {
-				matchFound = true
-				matchVal = ed.base
-			}
-			if strings.HasPrefix(ed.s, s) {
-				foundPrefix = true
-			}
-		}
-
-		if matchFound {
-			lastMatch = &eData{s: s, base: matchVal}
-			lastMatchLen = len(buf)
-		}
-
-		if !foundPrefix {
-			if lastMatch != nil {
-				extra := len(buf) - lastMatchLen
-				for i := 0; i < extra; i++ {
-					r.UnreadByte()
-				}
-				return lastMatch.base, nil
-			}
-			return 0, errors.New("invalid emoji sequence")
-		}
-
-		if len(buf) > 64 {
-			return 0, errors.New("sequence too long")
+	for _, ed := range cachedSorted {
+		if bytes.HasPrefix(peeked, []byte(ed.s)) {
+			r.Discard(len(ed.s))
+			return ed.base, nil
 		}
 	}
+
+	return 0, errors.New("invalid emoji sequence")
 }
