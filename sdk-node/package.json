@@ -1,6 +1,6 @@
 {
     "name": "@ikwerre-dev/emojidb",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "type": "module",
     "description": "High-performance Node.js SDK for the EmojiDB encrypted engine.",
     "main": "index.js",
