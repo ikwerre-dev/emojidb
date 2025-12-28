@@ -32,6 +32,7 @@ type Database struct {
 	Tables     map[string]*Table
 	Orphans    map[string][]*SealedClump
 	SyncSafety bool
+	stopFlush  chan struct{}
 }
 
 type Table struct {
@@ -707,7 +708,57 @@ func (db *Database) LoadSchemas() error {
 	return nil
 }
 
+func (db *Database) StartAutoFlush(interval time.Duration) {
+	db.stopFlush = make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				// Identify dirty tables
+				var dirtyTables []string
+				db.Mu.RLock()
+				for name, table := range db.Tables {
+					table.Mu.RLock()
+					if len(table.HotHeap.Rows) > 0 {
+						dirtyTables = append(dirtyTables, name)
+					}
+					table.Mu.RUnlock()
+				}
+				db.Mu.RUnlock()
+
+				// Flush them
+				for _, name := range dirtyTables {
+					// We ignore errors in auto-flush loop to keep going
+					_ = db.Flush(name)
+				}
+			case <-db.stopFlush:
+				return
+			}
+		}
+	}()
+}
+
 func (db *Database) Close() error {
+	// Stop auto-flusher if running
+	if db.stopFlush != nil {
+		close(db.stopFlush)
+		db.stopFlush = nil
+	}
+
+	// 1. Force Flush All Tables
+	db.Mu.RLock()
+	tableNames := make([]string, 0, len(db.Tables))
+	for name := range db.Tables {
+		tableNames = append(tableNames, name)
+	}
+	db.Mu.RUnlock()
+
+	for _, name := range tableNames {
+		_ = db.Flush(name)
+	}
+
 	db.Mu.Lock()
 	defer db.Mu.Unlock()
 	if db.SafetyFile != nil {

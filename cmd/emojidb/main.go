@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/ikwerre-dev/EmojiDB/core"
 	"github.com/ikwerre-dev/EmojiDB/query"
@@ -52,6 +53,10 @@ func handle(req Request) {
 		if err != nil {
 			sendError(req.ID, err.Error())
 		} else {
+			// Auto-Flush Strategy:
+			// Check for dirty data every 1 second.
+			// This is lightweight (memory check) and only writes if needed.
+			db.StartAutoFlush(1 * time.Second)
 			sendSuccess(req.ID, "opened")
 		}
 
