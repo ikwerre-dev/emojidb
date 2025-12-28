@@ -1,4 +1,4 @@
-package emojidb
+package core
 
 import (
 	"errors"
@@ -35,11 +35,11 @@ func NewHotHeap(maxRows int) *HotHeap {
 }
 
 func (t *Table) Insert(record Row) error {
-	t.mu.Lock()
-	defer t.mu.Unlock()
+	t.Mu.Lock()
+	defer t.Mu.Unlock()
 
 	if t.HotHeap == nil {
-		t.HotHeap = NewHotHeap(1000) // leaving this limit here sinc we're just testing
+		t.HotHeap = NewHotHeap(1000) // testing limit
 	}
 
 	for _, field := range t.Schema.Fields {
@@ -47,20 +47,19 @@ func (t *Table) Insert(record Row) error {
 		if !ok {
 			return errors.New("missing field: " + field.Name)
 		}
-		// when i have strength, i'd add type valiudation here
 		_ = val
 	}
 
 	t.HotHeap.Rows = append(t.HotHeap.Rows, record)
 
 	if len(t.HotHeap.Rows) >= t.HotHeap.MaxRows {
-		t.sealHotHeap()
+		t.SealHotHeap()
 	}
 
 	return nil
 }
 
-func (t *Table) sealHotHeap() {
+func (t *Table) SealHotHeap() {
 	clump := &SealedClump{
 		Rows:     t.HotHeap.Rows,
 		SealedAt: time.Now(),
@@ -72,8 +71,8 @@ func (t *Table) sealHotHeap() {
 	}
 
 	t.SealedClumps = append(t.SealedClumps, clump)
-	if t.db != nil {
-		t.db.persistClump(t.Name, clump)
+	if t.Db != nil {
+		t.Db.PersistClump(t.Name, clump)
 	}
 	t.HotHeap = NewHotHeap(t.HotHeap.MaxRows)
 }

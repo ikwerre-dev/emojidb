@@ -1,4 +1,4 @@
-package emojidb
+package crypto
 
 import (
 	"crypto/aes"
@@ -7,11 +7,11 @@ import (
 	"crypto/sha256"
 	"errors"
 	"io"
+	"sort"
 	"strings"
 )
 
-// im basically just using these emojis as a lookup table for byte values, you get shey? 
-var emojiAlphabet = []string{
+var EmojiAlphabet = []string{
 	"😀", "😁", "😂", "🤣", "😃", "😄", "😅", "😆", "😉", "😊", "😋", "😎", "😍", "😘", "🥰", "😗",
 	"😙", "😚", "☺️", "🙂", "🤗", "🤩", "🤔", "🤨", "😐", "😑", "😶", "🙄", "😏", "😣", "😥", "😮",
 	"🤐", "😯", "😪", "😫", "😴", "😌", "😛", "😜", "😝", "🤤", "😒", "😓", "😔", "😕", "🙃", "🤑",
@@ -30,13 +30,13 @@ var emojiAlphabet = []string{
 	"💂", "👷", "🤴", "👸", "👳", "👲", "🧕", "🤵", "👰", "🤰", "🤱", "👼", "🎅", "🤶", "🦸", "🦹",
 }
 
-func (db *Database) deriveKey() []byte {
-	hash := sha256.Sum256([]byte(db.key))
+func DeriveKey(key string) []byte {
+	hash := sha256.Sum256([]byte(key))
 	return hash[:]
 }
 
-func (db *Database) encrypt(data []byte) ([]byte, error) {
-	block, err := aes.NewCipher(db.deriveKey())
+func Encrypt(data []byte, key string) ([]byte, error) {
+	block, err := aes.NewCipher(DeriveKey(key))
 	if err != nil {
 		return nil, err
 	}
@@ -54,8 +54,8 @@ func (db *Database) encrypt(data []byte) ([]byte, error) {
 	return gcm.Seal(nonce, nonce, data, nil), nil
 }
 
-func (db *Database) decrypt(ciphertext []byte) ([]byte, error) {
-	block, err := aes.NewCipher(db.deriveKey())
+func Decrypt(ciphertext []byte, key string) ([]byte, error) {
+	block, err := aes.NewCipher(DeriveKey(key))
 	if err != nil {
 		return nil, err
 	}
@@ -74,37 +74,44 @@ func (db *Database) decrypt(ciphertext []byte) ([]byte, error) {
 	return gcm.Open(nil, nonce, ciphertext, nil)
 }
 
-func (db *Database) encodeToEmojis(data []byte) string {
+func EncodeToEmojis(data []byte) string {
 	var sb strings.Builder
 	for _, b := range data {
-		sb.WriteString(emojiAlphabet[int(b)%len(emojiAlphabet)])
+		sb.WriteString(EmojiAlphabet[int(b)%len(EmojiAlphabet)])
 	}
 	return sb.String()
 }
 
-func (db *Database) decodeFromEmojis(s string) ([]byte, error) {
-
-	emojiMap := make(map[string]byte)
-	for i, emoji := range emojiAlphabet {
+func DecodeFromEmojis(s string) ([]byte, error) {
+	type eData struct {
+		s    string
+		base byte
+	}
+	var sorted []eData
+	for i, e := range EmojiAlphabet {
 		if i < 256 {
-			emojiMap[emoji] = byte(i)
+			sorted = append(sorted, eData{e, byte(i)})
 		}
 	}
+
+	sort.Slice(sorted, func(i, j int) bool {
+		return len(sorted[i].s) > len(sorted[j].s)
+	})
 
 	var result []byte
 	remaining := s
 	for len(remaining) > 0 {
 		found := false
-		for emoji, b := range emojiMap {
-			if strings.HasPrefix(remaining, emoji) {
-				result = append(result, b)
-				remaining = remaining[len(emoji):]
+		for _, ed := range sorted {
+			if strings.HasPrefix(remaining, ed.s) {
+				result = append(result, ed.base)
+				remaining = remaining[len(ed.s):]
 				found = true
 				break
 			}
 		}
 		if !found {
-			return nil, errors.New("invalid emoji in payload at: " + remaining)
+			return nil, errors.New("invalid emoji in payload")
 		}
 	}
 	return result, nil

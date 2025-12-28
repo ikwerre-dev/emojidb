@@ -1,4 +1,4 @@
-package emojidb
+package core
 
 import (
 	"errors"
@@ -24,10 +24,10 @@ type Schema struct {
 }
 
 func (db *Database) DefineSchema(tableName string, fields []Field) error {
-	db.mu.Lock()
-	defer db.mu.Unlock()
+	db.Mu.Lock()
+	defer db.Mu.Unlock()
 
-	if _, ok := db.schemas[tableName]; ok {
+	if _, ok := db.Schemas[tableName]; ok {
 		return errors.New("schema already defined for table: " + tableName)
 	}
 
@@ -36,12 +36,21 @@ func (db *Database) DefineSchema(tableName string, fields []Field) error {
 		Fields:  fields,
 	}
 
-	db.schemas[tableName] = schema
-	db.tables[tableName] = &Table{
-		db:      db,
-		Name:    tableName,
-		Schema:  schema,
-		HotHeap: NewHotHeap(1000), // default limit for MVP
+	db.Schemas[tableName] = schema
+
+	if table, ok := db.Tables[tableName]; ok {
+		table.Schema = schema
+	} else {
+		db.Tables[tableName] = &Table{
+			Db:      db,
+			Name:    tableName,
+			Schema:  schema,
+			HotHeap: NewHotHeap(1000),
+		}
+		if orphans, ok := db.Orphans[tableName]; ok {
+			db.Tables[tableName].SealedClumps = orphans
+			delete(db.Orphans, tableName)
+		}
 	}
 
 	return nil
