@@ -92,7 +92,7 @@ npm install @ikwerre-dev/emojidb
 
 ### 2. Standalone Usage
 ```javascript
-const EmojiDB = require('@ikwerre-dev/emojidb');
+import EmojiDB from '@ikwerre-dev/emojidb';
 const db = new EmojiDB(); // Auto-detects OS/Arch and downloads from GitHub
 
 async function start() {

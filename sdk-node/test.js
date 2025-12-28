@@ -1,15 +1,16 @@
-const EmojiDB = require('./index');
-const path = require('path');
+import EmojiDB from './index.js';
+import path from 'path';
 
 async function runTest() {
-    // Standalone mode: auto-downloads engine from GitHub if not found
-    const db = new EmojiDB();
+    // For local testing: point to the engine we just built
+    const db = new EmojiDB({ enginePath: path.join(process.cwd(), 'emojidb-engine') });
 
     try {
-        console.log('--- EMOJIDB NODE.JS TEST ---');
+        console.log('--- EMOJIDB NODE.JS TEST (ESM) ---');
 
-        await db.connect();
-        console.log('1. Engine Connected');
+        const status = await db.connect();
+        console.log('1. Engine Status:', status);
+        // Output: { status: 'connected', pid: 12345 }
 
         await db.open('node_showcase.db', 'node-secret-2025');
         console.log('2. Database Opened');
@@ -28,7 +29,7 @@ async function runTest() {
         console.log('5. Query Results:', results);
 
         if (results.length > 0 && results[0].username === 'emoji_king') {
-            console.log('✅ TEST PASSED: Node.js successfully interacted with Go core!');
+            console.log('✅ TEST PASSED: Node.js successfully interacted with Go core via ESM!');
         } else {
             console.log('❌ TEST FAILED: Data mismatch');
         }

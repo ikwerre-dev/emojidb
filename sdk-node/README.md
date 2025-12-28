@@ -24,7 +24,7 @@ EmojiDB stores everything in an `emojidb/` folder in your project root.
 - `[dbname].safety`: Crash recovery buffer.
 
 ```javascript
-const EmojiDB = require('@ikwerre-dev/emojidb');
+import EmojiDB from '@ikwerre-dev/emojidb';
 const db = new EmojiDB();
 await db.connect();
 await db.open('prod.db', 'secret-key');

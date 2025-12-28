@@ -1,9 +1,13 @@
-const { spawn } = require('child_process');
-const path = require('path');
-const readline = require('readline');
-const fs = require('fs');
-const https = require('https');
-const os = require('os');
+import { spawn } from 'child_process';
+import path from 'path';
+import readline from 'readline';
+import fs from 'fs';
+import https from 'https';
+import os from 'os';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class BinaryManager {
     constructor() {
@@ -14,50 +18,66 @@ class BinaryManager {
         this.enginePath = path.join(this.binDir, this.engineName);
     }
 
+    async download(url, dest) {
+        return new Promise((resolve, reject) => {
+            const file = fs.createWriteStream(dest);
+            const request = (requestUrl) => {
+                https.get(requestUrl, (response) => {
+                    // Handle All Redirects (301, 302, 307, 308)
+                    if ([301, 302, 307, 308].includes(response.statusCode) && response.headers.location) {
+                        request(response.headers.location);
+                        return;
+                    }
+
+                    if (response.statusCode !== 200) {
+                        fs.unlink(dest, () => { });
+                        reject(new Error(`Server returned HTTP ${response.statusCode}. Please ensure a Release exists with the correctly named binary: ${this.engineName}`));
+                        return;
+                    }
+
+                    response.pipe(file);
+                    file.on('finish', () => {
+                        file.close();
+                        if (this.platform !== 'win32') {
+                            fs.chmodSync(dest, 0o755);
+                        }
+                        resolve(dest);
+                    });
+                }).on('error', (err) => {
+                    fs.unlink(dest, () => { });
+                    reject(err);
+                });
+            };
+            request(url);
+        });
+    }
+
     async ensureBinary() {
         if (fs.existsSync(this.enginePath)) return this.enginePath;
 
-        console.log(`🚀 EmojiDB: Engine not found for ${this.platform}-${this.arch}. Downloading from GitHub...`);
+        console.log(`🚀 EmojiDB: Engine not found for ${this.platform}-${this.arch}. Attempting download...`);
 
         if (!fs.existsSync(this.binDir)) {
             fs.mkdirSync(this.binDir, { recursive: true });
         }
 
         const url = `https://github.com/ikwerre-dev/EmojiDB/releases/latest/download/${this.engineName}`;
-
-        return new Promise((resolve, reject) => {
-            const file = fs.createWriteStream(this.enginePath);
-            https.get(url, (response) => {
-                if (response.statusCode === 302) {
-                    // Handle redirect (e.g. to objects.githubusercontent.com)
-                    https.get(response.headers.location, (res) => res.pipe(file));
-                } else if (response.statusCode !== 200) {
-                    reject(new Error(`Failed to download engine: HTTP ${response.statusCode}. Please ensure a release exists at github.com/ikwerre-dev/EmojiDB`));
-                    return;
-                } else {
-                    response.pipe(file);
-                }
-
-                file.on('finish', () => {
-                    file.close();
-                    if (this.platform !== 'win32') {
-                        fs.chmodSync(this.enginePath, 0o755);
-                    }
-                    console.log('✅ EmojiDB: Engine downloaded and ready.');
-                    resolve(this.enginePath);
-                });
-            }).on('error', (err) => {
-                fs.unlink(this.enginePath, () => { });
-                reject(err);
-            });
-        });
+        try {
+            await this.download(url, this.enginePath);
+            console.log('✅ EmojiDB: Engine ready.');
+            return this.enginePath;
+        } catch (err) {
+            console.error(`\n❌ EmojiDB Setup Error: ${err.message}`);
+            console.error(`💡 FIX: You MUST compile and upload '${this.engineName}' to your GitHub Release for this to work standalone.`);
+            throw err;
+        }
     }
 }
 
 class EmojiDB {
     constructor(options = {}) {
         this.manager = new BinaryManager();
-        this.enginePath = options.enginePath || null; // Override for local dev
+        this.enginePath = options.enginePath || null;
         this.process = null;
         this.rl = null;
         this.pending = new Map();
@@ -98,9 +118,17 @@ class EmojiDB {
                 reject(new Error(`Failed to start engine: ${err.message}`));
             });
 
-            // Simple delay to ensure process is ready
-            setTimeout(resolve, 100);
+            setTimeout(() => {
+                resolve({ status: 'connected', pid: this.process.pid });
+            }, 100);
         });
+    }
+
+    get status() {
+        if (this.process && !this.process.killed) {
+            return { status: 'connected', pid: this.process.pid };
+        }
+        return { status: 'disconnected' };
     }
 
     async send(method, params = {}) {
@@ -155,4 +183,4 @@ class EmojiDB {
     }
 }
 
-module.exports = EmojiDB;
+export default EmojiDB;
