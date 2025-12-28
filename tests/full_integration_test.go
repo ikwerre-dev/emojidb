@@ -33,6 +33,7 @@ func TestFullShowcase(t *testing.T) {
 	os.Remove(dbPath)
 	os.Remove(safetyPath)
 	os.Remove(dumpPath)
+	os.Remove(filepath.Join(wd, "secure.pem"))
 
 	// 1. Open Database
 	start := time.Now()
@@ -250,6 +251,39 @@ func TestFullShowcase(t *testing.T) {
 		name string
 		took time.Duration
 	}{"JSON Export", time.Since(start)})
+
+	// 14. Advanced Security: Generating secure.pem
+	start = time.Now()
+	fmt.Println("14. Advanced Security: Generating secure.pem (Master Key)")
+	err = db.Secure()
+	if err != nil {
+		t.Fatalf("Secure operation failed: %v", err)
+	}
+	pemPath := filepath.Join(filepath.Dir(dbPath), "secure.pem")
+	masterKeyBytes, err := os.ReadFile(pemPath)
+	if err != nil {
+		t.Fatalf("Failed to read secure.pem: %v", err)
+	}
+	masterKey := string(masterKeyBytes)
+	fmt.Printf("   Master Key Generated: %s...\n", string(masterKey[:20]))
+	timings = append(timings, struct {
+		name string
+		took time.Duration
+	}{"Generate Secure PEM", time.Since(start)})
+
+	// 15. Advanced Security: Authorizing Key Rotation
+	start = time.Now()
+	fmt.Println("15. Advanced Security: Authorizing Key Rotation (Full Disk Re-encryption)")
+	newSecret := "rotated-secret-2026"
+	err = db.ChangeKey(newSecret, masterKey)
+	if err != nil {
+		t.Fatalf("Key rotation failed: %v", err)
+	}
+	fmt.Printf("   Success: Database re-encrypted with new key\n")
+	timings = append(timings, struct {
+		name string
+		took time.Duration
+	}{"Rotate Master Key", time.Since(start)})
 
 	fmt.Println("\nTEST SUMMARY")
 	fmt.Println("==========================================================")

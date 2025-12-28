@@ -3,7 +3,9 @@ package core
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/ikwerre-dev/emojidb/crypto"
@@ -98,6 +100,68 @@ func (db *Database) Load() error {
 
 func (db *Database) PersistClump(tableName string, clump *SealedClump) error {
 	return storage.PersistClump(db.File, &db.Mu, tableName, clump, db.Key, crypto.Encrypt, crypto.EncodeToEmojis)
+}
+
+func (db *Database) Secure() error {
+	path := filepath.Join(filepath.Dir(db.Path), "secure.pem")
+	if _, err := os.Stat(path); err == nil {
+		return errors.New("security already initialized")
+	}
+
+	rawKey := make([]byte, 32)
+	crypto.RandRead(rawKey)
+	emojiKey := crypto.EncodeToEmojis(rawKey)
+
+	return os.WriteFile(path, []byte(emojiKey), 0600)
+}
+
+func (db *Database) ChangeKey(newKey string, masterKey string) error {
+	path := filepath.Join(filepath.Dir(db.Path), "secure.pem")
+	actualMaster, err := os.ReadFile(path)
+	if err != nil {
+		return errors.New("security not initialized or secure.pem missing")
+	}
+
+	if string(actualMaster) != masterKey {
+		return errors.New("invalid master key provided")
+	}
+
+	db.Mu.Lock()
+	defer db.Mu.Unlock()
+
+	// 1. Truncate and reset file
+	err = db.File.Truncate(0)
+	if err != nil {
+		return err
+	}
+	_, err = db.File.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
+
+	// 2. Write new header
+	if err := storage.WriteHeader(db.File); err != nil {
+		return err
+	}
+
+	// 3. Temporarily set new key to re-persist
+	oldKey := db.Key
+	db.Key = newKey
+
+	// 4. Re-persist all existing sealed clumps with new key
+	for tableName, table := range db.Tables {
+		table.Mu.RLock()
+		for _, clump := range table.SealedClumps {
+			if err := storage.PersistClump(db.File, &db.Mu, tableName, clump, db.Key, crypto.Encrypt, crypto.EncodeToEmojis); err != nil {
+				db.Key = oldKey // Rollback key if failed
+				table.Mu.RUnlock()
+				return err
+			}
+		}
+		table.Mu.RUnlock()
+	}
+
+	return nil
 }
 
 func (db *Database) DumpAsJSON(tableName string) (string, error) {

@@ -48,6 +48,10 @@ func init() {
 	})
 }
 
+func RandRead(b []byte) (int, error) {
+	return rand.Read(b)
+}
+
 func DeriveKey(key string) []byte {
 	hash := sha256.Sum256([]byte(key))
 	return hash[:]

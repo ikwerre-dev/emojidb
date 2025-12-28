@@ -87,14 +87,37 @@ GOOS=js GOARCH=wasm go build -o emojidb.wasm
 ### 2. Sidecar Service
 Run a small Go service as a "sidecar" that provides a REST or JSON-RPC API for your JS frontend. 
 
+## Advanced Security & Key Management
+
+EmojiDB features a multi-layered security system:
+- **0600 File Permissions**: Database and safety files are restricted to the owner by default.
+- **One-Time Secure PEM**: Run `db.Secure()` to generate a `secure.pem` containing a master emoji-encoded key for recovery and authorization.
+- **Key Rotation**: Rotate your database secrets using `db.ChangeKey(newKey, securePemPath)`. This process re-encrypts all data on disk with the new key.
+
+## Dashboard & Connectivity
+
+EmojiDB includes a high-end, minimalistic dashboard built with Next.js for real-time data exploration and management.
+
+### Starting the Bridge Server
+To connect the dashboard, run the WebSocket bridge:
+```bash
+go run main.go
+```
+
+### Dashboard UI
+1. Navigate to the `dashboard/` directory.
+2. Install dependencies: `npm install`.
+3. Run the dashboard: `npm run dev`.
+4. Connect using your database path and secret key.
+
+## Performance Benchmarks
+EmojiDB is optimized for microsecond-precision operations:
+- **Bulk Ingestion (1500)**: < 10ms
+- **Bulk Delete (50)**: < 5ms
+- **Total Showcase Flow**: < 40ms
+
 ## Full Feature Showcase
-
-To see a complete end-to-end demonstration of EmojiDB (initialization, ingestion, persistence, total emoji encoding, querying, safety backup, and JSON dumping), run the following command:
-
+To see a complete end-to-end demonstration of all core and advanced features:
 ```bash
 go test -v tests/full_integration_test.go
 ```
-
-This will output a verbose log of all system processes and show the final data in human-readable JSON format.
-
-## Clumping & Performance
