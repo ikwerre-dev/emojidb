@@ -35,7 +35,7 @@ export default function Home() {
           <div className="col-span-1  border-b-2 border-b-white/90  border-r-2 border-r-white/90">
 
           </div>
-          <div className="col-span-3 border-b-2 py-4 border-b-white/90 border-r-2 border-r-white/90 flex flex-col justify-center px-12">
+          <div className="col-span-3 border-b-2 py-5 border-b-white/90 border-r-2 border-r-white/90 flex flex-col justify-center px-8">
             <h2 className="font-sekuya text-5xl font-bold text-white/90 mb-4">
               Database, but encrypted with emojis
             </h2>
@@ -115,6 +115,64 @@ export default function Home() {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 border-x-2 border-x-white/90">
+          <div className="border-b-2 border-b-white/90 flex items-center justify-center py-8">
+            <h2 className="font-sekuya text-4xl font-bold text-white/90">wtf can this do?</h2>
+          </div>
+        </div>
+
+
+
+        <div className="grid grid-cols-4 border-x-2 border-x-white/90">
+          <div className="col-span-1 border-b-2 border-b-white/90 border-r-2 border-r-white/90 px-8 py-8">
+            <h3 className="font-sekuya text-xl font-bold text-white/90 mb-3">Schema Management</h3>
+            <p className="text-white/70 text-sm">
+              Define tables with typed fields, unique constraints, and automatic validation.
+            </p>
+          </div>
+
+          <div className="col-span-1 border-b-2 border-b-white/90 border-r-2 border-r-white/90 px-8 py-8">
+            <h3 className="font-sekuya text-xl font-bold text-white/90 mb-3">Fast Queries</h3>
+            <p className="text-white/70 text-sm">
+              In-memory storage with efficient querying and filtering capabilities.
+            </p>
+          </div>
+
+          
+          <div className="col-span-1 border-b-2 border-b-white/90 border-r-2 border-r-white/90 px-8 py-8">
+            <h3 className="font-sekuya text-xl font-bold text-white/90 mb-3">Emoji Encoding</h3>
+            <p className="text-white/70 text-sm">
+              Data is encoded as emoji sequences for a unique storage format.
+            </p>
+          </div>
+
+         
+
+          <div className="col-span-1 border-b-2 border-b-white/90 px-8 py-8">
+            <h3 className="font-sekuya text-xl font-bold text-white/90 mb-3">Cross-Platform</h3>
+            <p className="text-white/70 text-sm">
+              Works with Go and Node.js, with TypeScript definitions included.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 border-x-2 border-x-white/90">
+          <div className="col-span-1 border-b-2 py-[5rem] border-b-white/90 border-r-2 border-r-white/90 flex flex-col items-center justify-center py-8">
+            <p className="font-sekuya text-4xl font-bold text-white/90 mb-2">2.5K+</p>
+            <p className="text-white/60 text-sm">Lines of Code</p>
+          </div>
+
+          <div className="col-span-1 border-b-2 py-[5rem] border-b-white/90 border-r-2 border-r-white/90 flex flex-col items-center justify-center py-8">
+            <p className="font-sekuya text-4xl font-bold text-white/90 mb-2">15</p>
+            <p className="text-white/60 text-sm">Files</p>
+          </div>
+ 
+
+          <div className="col-span-1 border-b-2 py-[5rem] border-b-white/90 flex flex-col items-center justify-center py-8">
+            <p className="font-sekuya text-4xl font-bold text-white/90 mb-2">48h</p>
+            <p className="text-white/60 text-sm">Build Time</p>
+          </div>
+        </div>
         <div className="grid grid-cols-6 border-x-2 border-x-white/90">
           <div className="col-span-2 border-b-2 border-b-white/90 border-r-2 border-r-white/90 flex flex-col px-8 py-6">
             <h3 className="font-sekuya text-2xl font-bold text-white/90 mb-4">Why did I Build This</h3>
