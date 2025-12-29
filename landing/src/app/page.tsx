@@ -17,7 +17,7 @@ export default function Home() {
             </span>
           </h1>
           <div className="grid grid-cols-6 border-2 border-x-white/90">
-            <div className="border-r-2 col-span-2 gap-2 flex cursor-pointer hover:bg-white/50 transition-all duration-300 p-5">
+            <div className="border-r-2 col-span-2 gap-2 flex cursor-pointer bg-white/5 hover:bg-white/50 transition-all duration-300 p-5">
               <Github size={20} />
               <p>did i cook? if yes...then star this repo</p>
             </div>
@@ -115,66 +115,42 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 border-x-2 border-x-white/90">
-          <div className="border-b-2 border-b-white/90 flex items-center justify-center py-8">
-            <h2 className="font-sekuya text-4xl font-bold text-white/90">wtf can this do?</h2>
+       
+        <div className="relative border-x-2 border-x-white/90">
+          <div className="absolute inset-0">
+            <svg width="100%" height="100%" aria-hidden="true">
+              <defs>
+                <pattern viewBox="0 0 10 10" width="10" height="10" patternUnits="userSpaceOnUse" id="_r12R_6_">
+                  <circle cx="5" cy="5" r="1" fill="currentColor" className="fill-white/30"></circle>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#_r12R_6_)"></rect>
+            </svg>
+          </div>
+
+          <div className="relative z-10 p-[2rem]">
+            <div className="grid grid-cols-3 bg-[#0a0a0a]  ">
+              <div className="col-span-1  flex flex-col items-center justify-center py-12">
+                <p className="font-sekuya text-4xl font-bold text-white/90 mb-2">10,994</p>
+                <p className="text-white/60 text-sm">Lines of Code</p>
+              </div>
+
+              <div className="col-span-1  flex flex-col items-center justify-center py-12">
+                <p className="font-sekuya text-4xl font-bold text-white/90 mb-2">40</p>
+                <p className="text-white/60 text-sm">Code Files</p>
+              </div>
+
+              <div className="col-span-1 flex flex-col items-center justify-center py-12">
+                <p className="font-sekuya text-4xl font-bold text-white/90 mb-2">48h</p>
+                <p className="text-white/60 text-sm">Build Time</p>
+              </div>
+            </div>
           </div>
         </div>
 
 
-
-        <div className="grid grid-cols-4 border-x-2 border-x-white/90">
-          <div className="col-span-1 border-b-2 border-b-white/90 border-r-2 border-r-white/90 px-8 py-8">
-            <h3 className="font-sekuya text-xl font-bold text-white/90 mb-3">Schema Management</h3>
-            <p className="text-white/70 text-sm">
-              Define tables with typed fields, unique constraints, and automatic validation.
-            </p>
-          </div>
-
-          <div className="col-span-1 border-b-2 border-b-white/90 border-r-2 border-r-white/90 px-8 py-8">
-            <h3 className="font-sekuya text-xl font-bold text-white/90 mb-3">Fast Queries</h3>
-            <p className="text-white/70 text-sm">
-              In-memory storage with efficient querying and filtering capabilities.
-            </p>
-          </div>
-
-          
-          <div className="col-span-1 border-b-2 border-b-white/90 border-r-2 border-r-white/90 px-8 py-8">
-            <h3 className="font-sekuya text-xl font-bold text-white/90 mb-3">Emoji Encoding</h3>
-            <p className="text-white/70 text-sm">
-              Data is encoded as emoji sequences for a unique storage format.
-            </p>
-          </div>
-
-         
-
-          <div className="col-span-1 border-b-2 border-b-white/90 px-8 py-8">
-            <h3 className="font-sekuya text-xl font-bold text-white/90 mb-3">Cross-Platform</h3>
-            <p className="text-white/70 text-sm">
-              Works with Go and Node.js, with TypeScript definitions included.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 border-x-2 border-x-white/90">
-          <div className="col-span-1 border-b-2 py-[5rem] border-b-white/90 border-r-2 border-r-white/90 flex flex-col items-center justify-center py-8">
-            <p className="font-sekuya text-4xl font-bold text-white/90 mb-2">2.5K+</p>
-            <p className="text-white/60 text-sm">Lines of Code</p>
-          </div>
-
-          <div className="col-span-1 border-b-2 py-[5rem] border-b-white/90 border-r-2 border-r-white/90 flex flex-col items-center justify-center py-8">
-            <p className="font-sekuya text-4xl font-bold text-white/90 mb-2">15</p>
-            <p className="text-white/60 text-sm">Files</p>
-          </div>
- 
-
-          <div className="col-span-1 border-b-2 py-[5rem] border-b-white/90 flex flex-col items-center justify-center py-8">
-            <p className="font-sekuya text-4xl font-bold text-white/90 mb-2">48h</p>
-            <p className="text-white/60 text-sm">Build Time</p>
-          </div>
-        </div>
         <div className="grid grid-cols-6 border-x-2 border-x-white/90">
-          <div className="col-span-2 border-b-2 border-b-white/90 border-r-2 border-r-white/90 flex flex-col px-8 py-6">
+          <div className="col-span-2 border-y-2 border-y-white/90 border-r-2 border-r-white/90 flex flex-col px-8 py-6">
             <h3 className="font-sekuya text-2xl font-bold text-white/90 mb-4">Why did I Build This</h3>
             <p className="text-white/70 text-sm leading-relaxed">
               Honestly? I was bored and thought it would be cool to encrypt data and encode it as emojis.
@@ -182,20 +158,20 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="col-span-1 border-b-2 border-b-white/90 border-r-2 border-r-white/90">
+          <div className="col-span-1 border-y-2 border-y-white/90 border-r-2 border-r-white/90">
             <div className="h-full border-t-[12px] border-r-[12px] border-t-[#4d4d4d] border-r-[#4d4d4d]">
               <DiagonalMesh />
             </div>
           </div>
 
-          <div className="col-span-1 border-b-2 border-b-white/90 border-r-2 border-r-white/90 flex flex-col px-6 py-6">
+          <div className="col-span-1 border-y-2 border-y-white/90 border-r-2 border-r-white/90 flex flex-col px-6 py-6">
             <h3 className="font-sekuya text-xl font-bold text-white/90 mb-4">Tech Stack</h3>
             <p className="text-white/70 text-sm">
               Go, TypeScript, Node.js
             </p>
           </div>
 
-          <div className="col-span-1 border-b-2 border-b-white/90 border-r-2 border-r-white/90 flex flex-col px-6 py-6">
+          <div className="col-span-1 border-y-2 border-y-white/90 border-r-2 border-r-white/90 flex flex-col px-6 py-6">
             <h3 className="font-sekuya text-xl font-bold text-white/90 mb-4">Links</h3>
             <div className="space-y-3">
               <a
@@ -219,7 +195,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="col-span-1 border-b-2 border-b-white/90 flex flex-col px-6 py-6">
+          <div className="col-span-1 border-y-2 border-y-white/90 flex flex-col px-6 py-6">
             <p className="text-white/60 text-xs mb-2">© 2025 EmojiDB</p>
             <p className="text-white/50 text-xs">Built by Robinson Honour</p>
           </div>
