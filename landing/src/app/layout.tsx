@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, Barlow, Bebas_Neue, Saira } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Barlow, Bebas_Neue, Saira, Roboto_Slab } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -36,6 +36,12 @@ const sekuya = Saira({
   weight: ["400", "500", "600", "700", "800", "900"],
 });
 
+const robotoSlab = Roboto_Slab({
+  variable: "--font-roboto-slab",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
 export const metadata: Metadata = {
   title: "EmojiDB - Encrypted Emoji-Encoded Database",
   description: "Fast, secure, emoji-encoded database with encryption built-in",
@@ -49,7 +55,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${bartle.variable} ${hegarty.variable} ${sekuya.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${bartle.variable} ${hegarty.variable} ${sekuya.variable} ${robotoSlab.variable} antialiased`}
       >
         {children}
       </body>
