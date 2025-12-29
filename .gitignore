@@ -1,3 +1,5 @@
 *.safety
 *.pem
 *.db
+
+landing/node_modules
